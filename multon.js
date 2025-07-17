@@ -1,7 +1,6 @@
 "use strict";
 (function() {
 
-  // SVG иконка (одинаковая для активного и неактивного состояния)
   var iconSvg = `
     <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" 
          viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" 
@@ -14,9 +13,8 @@
   var addMultMenuItem = function() {
     var title = "Мультфильмы";
     var sources = ["tmdb", "cub"];
-    var selector = '[data-action="tv"]'; // вставить после "Сериалы"
+    var selector = '[data-action="movie"]'; // вставить после "Фильмы"
 
-    // Создаем пункт меню с иконкой
     var item = $(`
       <li class="menu__item selector" data-action="mad_mult">
         <div class="menu__ico">${iconSvg}</div>
@@ -24,18 +22,14 @@
       </li>
     `);
 
-    // Смена внешнего вида при фокусе
     item.on("hover:focus", function() {
-      // если хочешь менять иконку на активную, можно поменять содержимое .menu__ico здесь
-      // item.find(".menu__ico").html(iconActive); // например
+      // можно менять иконку на активную
     });
 
     item.on("hover:blur", function() {
-      // возвращаем неактивную иконку, если меняли
-      // item.find(".menu__ico").html(iconSvg);
+      // возвращаем иконку
     });
 
-    // При выборе пункта меню
     item.on("hover:enter", function() {
       var activity = Lampa.Activity.active();
       var source = sources.includes(activity.source) ? activity.source : sources[0];
@@ -52,16 +46,13 @@
       });
     });
 
-    // Вставляем пункт после "Сериалы"
     var menu = Lampa.Menu.render();
 
-    // Удаляем пункт "Аниме" если есть
     menu.find('[data-action="anime"]').remove();
 
     menu.find(selector).after(item);
   };
 
-  // Запуск при готовности приложения
   if (window.appready) {
     addMultMenuItem();
   } else {
