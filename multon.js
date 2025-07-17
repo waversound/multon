@@ -1,32 +1,48 @@
 (() => {
-    try {
-        const active = Lampa.Activity && Lampa.Activity.active;
-        if (!active) {
-            Lampa.Noty.show('Нет активного экрана');
-            return;
+    const pluginName = 'replaceAnimeTitleDom';
+    let replaced = false;
+
+    function tryReplace() {
+        if (replaced) return;
+
+        try {
+            // Поищем все элементы меню (обычно это li или div с классом)
+            const menuElements = document.querySelectorAll('nav, .menu, .menu__item, .menu-item, li, div');
+
+            for (const el of menuElements) {
+                // Проверяем, есть ли текст "Аниме" в элементе (учитываем возможный регистр)
+                if (el.textContent && el.textContent.trim().toLowerCase() === 'аниме') {
+                    // Меняем текст на "Мультфильмы"
+                    el.textContent = 'Мультфильмы';
+                    replaced = true;
+                    console.log(`[${pluginName}] Пункт меню "Аниме" заменён на "Мультфильмы"`);
+                    break;
+                }
+            }
+        } catch (e) {
+            console.error(`[${pluginName}] Ошибка при замене текста:`, e);
         }
+    }
 
-        // Пробуем взять пункты меню из активного экрана
-        let menuItems = null;
-
-        if (active.items && Array.isArray(active.items)) {
-            menuItems = active.items;
-        } else if (active.menu && Array.isArray(active.menu)) {
-            menuItems = active.menu;
+    // Наблюдатель за изменениями в DOM (вся страница)
+    const observer = new MutationObserver(() => {
+        if (!replaced) {
+            tryReplace();
         }
+    });
 
-        if (!menuItems) {
-            Lampa.Noty.show('Пункты меню не найдены в активном экране');
-            return;
-        }
+    // Запускаем наблюдение за всем телом документа с отслеживанием изменений в поддеревьях
+    observer.observe(document.body, { childList: true, subtree: true });
 
-        let message = 'Пункты меню (активный экран):\n\n';
-        menuItems.forEach((item, index) => {
-            message += `${index + 1}. title: "${item.title}", component: "${item.component}"\n`;
-        });
+    // Попытка заменить сразу, если меню уже загружено
+    tryReplace();
 
-        Lampa.Noty.show(message, 10000); // Показываем уведомление 10 секунд
-    } catch (e) {
-        Lampa.Noty.show('Ошибка при получении меню');
+    // Регистрируем плагин в Lampa (если нужно)
+    if (Lampa && Lampa.Plugins) {
+        Lampa.Plugins[pluginName] = {
+            name: 'Замена пункта "Аниме" на "Мультфильмы" (DOM)',
+            version: '1.0',
+            author: 'ChatGPT',
+        };
     }
 })();
