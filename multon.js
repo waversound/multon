@@ -1,65 +1,66 @@
 (() => {
-    const pluginName = 'multikMenuWithFilter';
-    const menuId = 'menu_multik_item_custom';
-
-    // Проверка: если уже есть пункт, не добавляем снова
-    if (document.getElementById(menuId)) return;
+    const pluginName = 'multikMenuFinal';
+    const menuId = 'menu_multik_final';
 
     function createMenuItem() {
         const item = document.createElement('div');
         item.className = 'menu__item selector';
         item.textContent = 'Мультфильмы';
-        item.dataset.action = 'multik_action';
         item.id = menuId;
 
         item.addEventListener('hover:enter', () => {
-            Lampa.Activity.push({
-                url: 'movie',
-                genres: ['мультфильм'],
-                title: 'Мультфильмы',
-                component: 'category',
-                page: 1,
-                source: 'tmdb',
-                search: '',
-                filter: {},
-            });
+            try {
+                Lampa.Activity.push({
+                    url: '',
+                    component: 'category',
+                    name: 'Мультфильмы',
+                    filter: {
+                        genre: ['мультфильм'],
+                        url: 'movie',
+                        source: 'tmdb',
+                        sort: 'year'
+                    }
+                });
+            } catch (e) {
+                console.error(`[${pluginName}] Ошибка при переходе в раздел мультфильмов:`, e);
+                Lampa.Noty.show('Ошибка перехода в мультфильмы');
+            }
         });
 
         return item;
     }
 
     function insertMenuItem() {
+        if (document.getElementById(menuId)) return;
+
         const menu = document.querySelector('.menu__list, .menu, .layout__menu, nav');
+        if (!menu) return;
 
-        if (menu && !document.getElementById(menuId)) {
-            const item = createMenuItem();
+        const newItem = createMenuItem();
 
-            // Добавим перед "Избранное", если он есть
-            const target = [...menu.children].find(el => el.textContent.trim().toLowerCase() === 'избранное');
+        const insertBefore = [...menu.children].find(el =>
+            el.textContent.trim().toLowerCase() === 'избранное'
+        );
 
-            if (target) {
-                menu.insertBefore(item, target);
-            } else {
-                menu.appendChild(item);
-            }
-
-            console.log(`[${pluginName}] Пункт "Мультфильмы" добавлен`);
+        if (insertBefore) {
+            menu.insertBefore(newItem, insertBefore);
+        } else {
+            menu.appendChild(newItem);
         }
+
+        console.log(`[${pluginName}] Пункт "Мультфильмы" добавлен`);
     }
 
-    // Следим за появлением меню
     const observer = new MutationObserver(() => {
         insertMenuItem();
     });
 
     observer.observe(document.body, { childList: true, subtree: true });
-
     insertMenuItem();
 
-    // Регистрируем плагин (необязательно, но полезно)
-    if (window.Lampa?.Plugins) {
+    if (Lampa?.Plugins) {
         Lampa.Plugins[pluginName] = {
-            name: 'Пункт меню "Мультфильмы"',
+            name: 'Меню "Мультфильмы"',
             version: '1.0',
             author: 'ChatGPT',
         };
