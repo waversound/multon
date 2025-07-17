@@ -1,83 +1,94 @@
 "use strict";
 
 (function () {
-  var init = function () {
-    var action = "mad_mult";
-    var title = "Мультфильмы";
-    var sources = ["tmdb", "cub"];
-    var insertAfter = "[data-action=\"tv\"]"; // Вставить после "Сериалы"
+    function init() {
+        const menuSelector = '[data-action="mad_mult"]';
+        const menuTitle = 'Мультфильмы';
+        const sourcePriority = ['tmdb', 'cub'];
 
-    // SVG: неактивная версия
-    var iconDefault = `
-      <svg class="icon-default" xmlns="http://www.w3.org/2000/svg" width="24" height="24" 
-        viewBox="0 0 24 24" fill="none" stroke="currentColor" 
-        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-        <path d="M3.22 5.838c-1.307 -.15 -1.22 -.578 -1.22 -.794c0 -.216 .424 -1.044 4.34 -1.044
-          c4.694 0 14.66 3.645 14.66 10.042s-8.71 4.931 -10.435 4.52c-1.724 -.412 -5.565 -2.256
-          -5.565 -4.174c0 -1.395 3.08 -2.388 6.715 -2.388c3.634 0 5.285 1.041 5.285 2c0 
-          .5 -.074 1.229 -1 1.5" />
-        <path d="M10.02 8a505.153 505.153 0 0 0 0 13" />
-      </svg>`;
+        $(menuSelector).remove(); // удаляем если уже есть
 
-    // SVG: активная версия
-    var iconActive = `
-      <svg class="icon-active" xmlns="http://www.w3.org/2000/svg" width="24" height="24" 
-        viewBox="0 0 24 24" fill="currentColor" stroke="none">
-        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-        <path d="M3.22 5.838c-1.307 -.15 -1.22 -.578 -1.22 -.794c0 -.216 .424 -1.044 4.34 -1.044
-          c4.694 0 14.66 3.645 14.66 10.042s-8.71 4.931 -10.435 4.52c-1.724 -.412 -5.565 -2.256
-          -5.565 -4.174c0 -1.395 3.08 -2.388 6.715 -2.388c3.634 0 5.285 1.041 5.285 2c0 
-          .5 -.074 1.229 -1 1.5" />
-        <path d="M10.02 8a505.153 505.153 0 0 0 0 13" />
-      </svg>`;
+        // Иконки: неактивная и активная
+        const iconInactive = `
+            <svg class="icon-mult icon-inactive" xmlns="http://www.w3.org/2000/svg" 
+                width="24" height="24" viewBox="0 0 24 24" fill="none" 
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" 
+                stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M5.5 3a3.5 3.5 0 0 1 3.25 4.8a7.017 7.017 0 0 0 -2.424 2.1a3.5 3.5 0 1 1 -.826 -6.9z" />
+                <path d="M18.5 3a3.5 3.5 0 1 1 -.826 6.902a7.013 7.013 0 0 0 -2.424 -2.103a3.5 3.5 0 0 1 3.25 -4.799z" />
+                <path d="M12 14m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" />
+            </svg>`;
 
-    // HTML кнопки
-    var button = $(`
-      <li class="menu__item selector" data-action="${action}">
-        <div class="menu__ico">
-          ${iconDefault}
-          ${iconActive}
-        </div>
-        <div class="menu__text">${title}</div>
-      </li>
-    `);
+        const iconActive = `
+            <svg class="icon-mult icon-active" xmlns="http://www.w3.org/2000/svg" 
+                width="24" height="24" viewBox="0 0 24 24" fill="none" 
+                stroke="white" stroke-width="2" stroke-linecap="round" 
+                stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M5.5 3a3.5 3.5 0 0 1 3.25 4.8a7.017 7.017 0 0 0 -2.424 2.1a3.5 3.5 0 1 1 -.826 -6.9z" />
+                <path d="M18.5 3a3.5 3.5 0 1 1 -.826 6.902a7.013 7.013 0 0 0 -2.424 -2.103a3.5 3.5 0 0 1 3.25 -4.799z" />
+                <path d="M12 14m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" />
+            </svg>`;
 
-    // CSS для переключения активной иконки
-    Lampa.Utils.putStyle(`
-      .menu__item .icon-active { display: none; }
-      .menu__item.--active .icon-default { display: none; }
-      .menu__item.--active .icon-active { display: block; }
-    `, 'mad_mult_style');
+        const item = $(`
+            <li class="menu__item selector" data-action="mad_mult">
+                <div class="menu__ico">
+                    ${iconInactive}
+                    ${iconActive}
+                </div>
+                <div class="menu__text">${menuTitle}</div>
+            </li>
+        `);
 
-    // Действие по нажатию
-    button.on("hover:enter", function () {
-      var activity = Lampa.Activity.active();
-      var currentSource = activity && activity.source;
-      var useSource = sources.includes(currentSource) ? currentSource : sources[0];
+        // Действие при выборе
+        item.on("hover:enter", function () {
+            const active = Lampa.Activity.active();
+            const source = sourcePriority.includes(active.source) ? active.source : sourcePriority[0];
 
-      Lampa.Activity.push({
-        url: "movie",
-        title: `${title} - ${useSource.toUpperCase()}`,
-        component: "category",
-        genres: 16,
-        id: 16,
-        source: useSource,
-        card_type: true,
-        page: 1
-      });
-    });
+            Lampa.Activity.push({
+                url: 'movie',
+                title: `${menuTitle} - ${source.toUpperCase()}`,
+                component: 'category',
+                genres: 16,
+                id: 16,
+                source: source,
+                card_type: true,
+                page: 1
+            });
+        });
 
-    // Вставка кнопки и удаление "Аниме"
-    Lampa.Menu.render().find(insertAfter).after(button);
-    Lampa.Menu.render().find('[data-action="anime"]').remove();
-  };
+        // Вставить пункт после "Сериалы"
+        const menu = Lampa.Menu.render();
+        menu.find('[data-action="tv"]').after(item);
 
-  if (window.appready) {
-    init();
-  } else {
-    Lampa.Listener.follow("app", function (e) {
-      if (e.type === "ready") init();
-    });
-  }
+        // Удалить "Аниме"
+        menu.find('[data-action="anime"]').remove();
+    }
+
+    // Стили для переключения иконок
+    const style = document.createElement('style');
+    style.innerHTML = `
+        .icon-active { display: none; }
+        .icon-inactive { display: block; }
+
+        .menu__item.focus[data-action="mad_mult"] .icon-inactive,
+        .menu__item.active[data-action="mad_mult"] .icon-inactive {
+            display: none;
+        }
+
+        .menu__item.focus[data-action="mad_mult"] .icon-active,
+        .menu__item.active[data-action="mad_mult"] .icon-active {
+            display: block;
+        }
+    `;
+    document.head.appendChild(style);
+
+    if (window.appready) {
+        init();
+    } else {
+        Lampa.Listener.follow("app", function (e) {
+            if (e.type === "ready") init();
+        });
+    }
 })();
