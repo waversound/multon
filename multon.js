@@ -10,6 +10,20 @@
       <path d="M10 12m-6 0a6 6 0 1 0 12 0a6 6 0 1 0 -12 0" />
     </svg>`;
 
+  // Функция получения порядка меню (копия из найденного кода)
+  function getSort(){
+    let items = [];
+    $('.menu__list:eq(0) .menu__item', html).each(function(){
+      items.push($(this).text().trim());
+    });
+    return items;
+  }
+
+  // Функция сохранения порядка
+  function saveSort(){
+    Storage.set('menu_sort', getSort());
+  }
+
   var addMultMenuItem = function() {
     var title = "Мультфильмы";
     var sources = ["tmdb", "cub"];
@@ -53,6 +67,9 @@
     } else {
       menu.append(item);
     }
+
+    // Обновляем порядок в Storage
+    saveSort();
   };
 
   if (window.appready) {
