@@ -1,24 +1,31 @@
 (() => {
     try {
-        let menuItems = null;
-
-        if (Lampa.Plugins && Lampa.Plugins.menu && Array.isArray(Lampa.Plugins.menu.items)) {
-            menuItems = Lampa.Plugins.menu.items;
-        } else if (Lampa.Menu && Array.isArray(Lampa.Menu.items)) {
-            menuItems = Lampa.Menu.items;
-        }
-
-        if (!menuItems) {
-            Lampa.Noty.show('Меню не найдено');
+        const active = Lampa.Activity && Lampa.Activity.active;
+        if (!active) {
+            Lampa.Noty.show('Нет активного экрана');
             return;
         }
 
-        let message = 'Пункты меню:\n\n';
+        // Пробуем взять пункты меню из активного экрана
+        let menuItems = null;
+
+        if (active.items && Array.isArray(active.items)) {
+            menuItems = active.items;
+        } else if (active.menu && Array.isArray(active.menu)) {
+            menuItems = active.menu;
+        }
+
+        if (!menuItems) {
+            Lampa.Noty.show('Пункты меню не найдены в активном экране');
+            return;
+        }
+
+        let message = 'Пункты меню (активный экран):\n\n';
         menuItems.forEach((item, index) => {
             message += `${index + 1}. title: "${item.title}", component: "${item.component}"\n`;
         });
 
-        Lampa.Noty.show(message, 10000); // Показывает уведомление на 10 секунд
+        Lampa.Noty.show(message, 10000); // Показываем уведомление 10 секунд
     } catch (e) {
         Lampa.Noty.show('Ошибка при получении меню');
     }
