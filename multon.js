@@ -2,11 +2,9 @@
 
 (function(){
 
-  // Название нового пункта меню и действие
   const menuAction = "mad_mult";
   const menuTitle = "Мультфильмы";
 
-  // HTML иконка (SVG) для пункта меню — можно вынести отдельно для читаемости
   const menuIconSVG = `
     <svg height="173" viewBox="0 0 180 173" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path fill-rule="evenodd" clip-rule="evenodd" d="M126 3C126 18.464 109.435 31 89 31C68.5655 31 52 18.464 52 3C52 2.4505 52.0209 1.90466 52.0622 1.36298C21.3146 15.6761 0 46.8489 0 83C0 132.706 40.2944 173 90 173C139.706 173 180 132.706 180 83C180 46.0344 157.714 14.2739 125.845 0.421326C125.948 1.27051 126 2.13062 126 3ZM88.5 169C125.779 169 156 141.466 156 107.5C156 84.6425 142.314 64.6974 122 54.0966C116.6 51.2787 110.733 55.1047 104.529 59.1496C99.3914 62.4998 94.0231 66 88.5 66C82.9769 66 77.6086 62.4998 72.4707 59.1496C66.2673 55.1047 60.3995 51.2787 55 54.0966C34.6864 64.6974 21 84.6425 21 107.5C21 141.466 51.2208 169 88.5 169Z" fill="currentColor"></path>
@@ -16,7 +14,6 @@
     </svg>
   `;
 
-  // Функция создания пункта меню через jQuery
   function createMenuItem() {
     return $(`
       <li class="menu__item selector" data-action="${menuAction}">
@@ -26,19 +23,23 @@
     `);
   }
 
-  // Основная функция инициализации пункта меню
   function initMenuItem() {
     const menuItem = createMenuItem();
+    const menuContainer = Lampa.Menu.render();
 
-    // Обработчик события выбора пункта меню
+    // Вставляем пункт "Мультфильмы" после "Сериалы"
+    menuContainer.find('[data-action="tv"]').after(menuItem);
+
+    // Удаляем пункт "Аниме"
+    menuContainer.find('[data-action="anime"]').remove();
+
+    // Обработчик выбора пункта меню
     menuItem.on("hover:enter", () => {
       const activeActivity = Lampa.Activity.active();
       const source = activeActivity.source;
-      // Источники, поддерживающие мультфильмы
       const supportedSources = ["tmdb", "cub"];
       const currentSource = supportedSources.includes(source) ? source : supportedSources[0];
 
-      // Открываем активность с подборкой мультфильмов (genres:16 - пример)
       Lampa.Activity.push({
         url: "movie",
         title: `${menuTitle} - ${currentSource.toUpperCase()}`,
@@ -51,17 +52,13 @@
       });
     });
 
-    // Вставляем новый пункт меню сразу после пункта с data-action="tv" (Сериалы)
-    const menuContainer = Lampa.Menu.render();
-    menuContainer.find('[data-action="tv"]').after(menuItem);
-
-    // Дополнительно: можно вставить с небольшой задержкой, если меню загружается асинхронно
+    // Дополнительная вставка с задержкой для асинхронной загрузки меню (если надо)
     setTimeout(() => {
       menuContainer.find('[data-action="tv"]').after(menuItem);
+      menuContainer.find('[data-action="anime"]').remove();
     }, 2000);
   }
 
-  // Запускаем функцию, когда приложение готово
   if(window.appready) {
     initMenuItem();
   } else {
