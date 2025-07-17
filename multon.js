@@ -1,15 +1,16 @@
 "use strict";
 (function() {
 
-  // SVG иконка (одинаковая для активного и неактивного состояния)
-  var iconSvg = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" 
-         viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.25" 
+  // SVG иконка (одинаковая для активного и неактивного состояния, 
+  // можно сделать разную, если надо)
+  var iconSvg = 
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" 
+         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" 
          stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icon-tabler-mickey">
       <path d="M5.5 3a3.5 3.5 0 0 1 3.25 4.8a7.017 7.017 0 0 0 -2.424 2.1a3.5 3.5 0 1 1 -.826 -6.9z" />
       <path d="M18.5 3a3.5 3.5 0 1 1 -.826 6.902a7.013 7.013 0 0 0 -2.424 -2.103a3.5 3.5 0 0 1 3.25 -4.799z" />
       <path d="M12 14m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" />
-    </svg>`;
+    </svg>;
 
   var addMultMenuItem = function() {
     var title = "Мультфильмы";
@@ -17,20 +18,22 @@
     var selector = '[data-action="tv"]'; // вставить после "Сериалы"
 
     // Создаем пункт меню с иконкой
-    var item = $(`
+    var item = $(
       <li class="menu__item selector" data-action="mad_mult">
         <div class="menu__ico">${iconSvg}</div>
         <div class="menu__text">${title}</div>
       </li>
-    `);
+    );
 
     // Смена внешнего вида при фокусе
     item.on("hover:focus", function() {
-      // можно менять иконку на активную, если надо
+      // если хочешь менять иконку на активную, можно поменять содержимое .menu__ico здесь
+      // item.find(".menu__ico").html(iconActive); // например
     });
 
     item.on("hover:blur", function() {
-      // вернуть неактивную иконку, если меняли
+      // возвращаем неактивную иконку, если меняли
+      // item.find(".menu__ico").html(iconSvg);
     });
 
     // При выборе пункта меню
@@ -40,7 +43,7 @@
 
       Lampa.Activity.push({
         url: "movie",
-        title: `${title} - ${source.toUpperCase()}`,
+        title: ${title} - ${source.toUpperCase()},
         component: "category",
         genres: 16,
         id: 16,
