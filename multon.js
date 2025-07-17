@@ -13,7 +13,6 @@
   var addMultMenuItem = function() {
     var title = "Мультфильмы";
     var sources = ["tmdb", "cub"];
-    var selector = '[data-action="movie"]'; // вставить после "Фильмы"
 
     var item = $(`
       <li class="menu__item selector" data-action="mad_mult">
@@ -22,13 +21,8 @@
       </li>
     `);
 
-    item.on("hover:focus", function() {
-      // можно менять иконку на активную
-    });
-
-    item.on("hover:blur", function() {
-      // возвращаем иконку
-    });
+    item.on("hover:focus", function() {});
+    item.on("hover:blur", function() {});
 
     item.on("hover:enter", function() {
       var activity = Lampa.Activity.active();
@@ -50,7 +44,15 @@
 
     menu.find('[data-action="anime"]').remove();
 
-    menu.find(selector).after(item);
+    var filmItem = menu.find('.menu__item').filter(function() {
+      return $(this).find('.menu__text').text().trim() === 'Фильмы';
+    });
+
+    if (filmItem.length) {
+      filmItem.after(item);
+    } else {
+      menu.append(item);
+    }
   };
 
   if (window.appready) {
