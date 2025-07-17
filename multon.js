@@ -1,15 +1,14 @@
 "use strict";
 (function() {
 
-  // SVG иконка (одинаковая для активного и неактивного состояния, 
-  // можно сделать разную, если надо)
+  // SVG иконка (одинаковая для активного и неактивного состояния)
   var iconSvg = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" 
-         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" 
+    <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" 
+         viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" 
          stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icon-tabler-mickey">
-      <path d="M5.5 3a3.5 3.5 0 0 1 3.25 4.8a7.017 7.017 0 0 0 -2.424 2.1a3.5 3.5 0 1 1 -.826 -6.9z" />
-      <path d="M18.5 3a3.5 3.5 0 1 1 -.826 6.902a7.013 7.013 0 0 0 -2.424 -2.103a3.5 3.5 0 0 1 3.25 -4.799z" />
-      <path d="M12 14m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" />
+      <path d="M4.58 2.5a3 3 0 0 1 2.78 4.11a6 6 0 0 0 -2.07 1.83a3 3 0 1 1 -.71 -5.94z" />
+      <path d="M15.42 2.5a3 3 0 1 1 -.71 5.94a6 6 0 0 0 -2.07 -1.83a3 3 0 0 1 2.78 -4.11z" />
+      <path d="M10 12m-6 0a6 6 0 1 0 12 0a6 6 0 1 0 -12 0" />
     </svg>`;
 
   var addMultMenuItem = function() {
