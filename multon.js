@@ -1,33 +1,22 @@
 "use strict";
 (function() {
 
+  // SVG иконка (одинаковая для активного и неактивного состояния)
   var iconSvg = `
     <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" 
-         viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" 
+         viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.25" 
          stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icon-tabler-mickey">
-      <path d="M4.58 2.5a3 3 0 0 1 2.78 4.11a6 6 0 0 0 -2.07 1.83a3 3 0 1 1 -.71 -5.94z" />
-      <path d="M15.42 2.5a3 3 0 1 1 -.71 5.94a6 6 0 0 0 -2.07 -1.83a3 3 0 0 1 2.78 -4.11z" />
-      <path d="M10 12m-6 0a6 6 0 1 0 12 0a6 6 0 1 0 -12 0" />
+      <path d="M5.5 3a3.5 3.5 0 0 1 3.25 4.8a7.017 7.017 0 0 0 -2.424 2.1a3.5 3.5 0 1 1 -.826 -6.9z" />
+      <path d="M18.5 3a3.5 3.5 0 1 1 -.826 6.902a7.013 7.013 0 0 0 -2.424 -2.103a3.5 3.5 0 0 1 3.25 -4.799z" />
+      <path d="M12 14m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" />
     </svg>`;
-
-  // Функция получения порядка меню (копия из найденного кода)
-  function getSort(){
-    let items = [];
-    $('.menu__list:eq(0) .menu__item', html).each(function(){
-      items.push($(this).text().trim());
-    });
-    return items;
-  }
-
-  // Функция сохранения порядка
-  function saveSort(){
-    Storage.set('menu_sort', getSort());
-  }
 
   var addMultMenuItem = function() {
     var title = "Мультфильмы";
     var sources = ["tmdb", "cub"];
+    var selector = '[data-action="tv"]'; // вставить после "Сериалы"
 
+    // Создаем пункт меню с иконкой
     var item = $(`
       <li class="menu__item selector" data-action="mad_mult">
         <div class="menu__ico">${iconSvg}</div>
@@ -35,9 +24,16 @@
       </li>
     `);
 
-    item.on("hover:focus", function() {});
-    item.on("hover:blur", function() {});
+    // Смена внешнего вида при фокусе
+    item.on("hover:focus", function() {
+      // можно менять иконку на активную, если надо
+    });
 
+    item.on("hover:blur", function() {
+      // вернуть неактивную иконку, если меняли
+    });
+
+    // При выборе пункта меню
     item.on("hover:enter", function() {
       var activity = Lampa.Activity.active();
       var source = sources.includes(activity.source) ? activity.source : sources[0];
@@ -54,24 +50,16 @@
       });
     });
 
+    // Вставляем пункт после "Сериалы"
     var menu = Lampa.Menu.render();
 
+    // Удаляем пункт "Аниме" если есть
     menu.find('[data-action="anime"]').remove();
 
-    var filmItem = menu.find('.menu__item').filter(function() {
-      return $(this).find('.menu__text').text().trim() === 'Фильмы';
-    });
-
-    if (filmItem.length) {
-      filmItem.after(item);
-    } else {
-      menu.append(item);
-    }
-
-    // Обновляем порядок в Storage
-    saveSort();
+    menu.find(selector).after(item);
   };
 
+  // Запуск при готовности приложения
   if (window.appready) {
     addMultMenuItem();
   } else {
