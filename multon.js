@@ -1,69 +1,95 @@
 (() => {
     const pluginName = 'replaceAnimeTitleToCartoons';
-
-    // Флаг для предотвращения повторной замены
     let replaced = false;
+    let retryCount = 0;
+    const maxRetries = 10;
+    const retryDelay = 500;
 
-    // Функция замены названия пункта меню
+    function log(...args) {
+        console.log(`[${pluginName}]`, ...args);
+    }
+
+    function findMenuItems() {
+        // Проверяем возможные места хранения меню
+        if (Lampa.Plugins && Lampa.Plugins.menu && Array.isArray(Lampa.Plugins.menu.items)) {
+            return Lampa.Plugins.menu.items;
+        }
+        if (Lampa.Menu && Array.isArray(Lampa.Menu.items)) {
+            return Lampa.Menu.items;
+        }
+        // Можно добавить сюда другие варианты, если нужно
+        return null;
+    }
+
+    function updateMenuUI() {
+        try {
+            // Пробуем вызвать перерисовку через известные методы
+            if (Lampa.Activity && typeof Lampa.Activity.render === 'function') {
+                Lampa.Activity.render();
+                log('Вызвана перерисовка Lampa.Activity');
+            } else {
+                // Если такого метода нет, можно пробросить событие или сделать костыль
+                Lampa.Listener.send('menu_reload');
+                log('Отправлено событие menu_reload');
+            }
+        } catch (e) {
+            log('Ошибка при обновлении UI:', e);
+        }
+    }
+
     function replaceTitle(menuItems) {
         try {
             if (replaced) return;
 
-            // Найдём пункт с component 'anime'
             const animeItem = menuItems.find(item => item.component === 'anime');
 
-            if (animeItem && animeItem.title !== 'Мультфильмы') {
-                animeItem.title = 'Мультфильмы';
-                replaced = true;
-
-                // Можно опционально обновить UI, если меню уже отрисовано
-                if (Lampa.Activity.active) {
-                    // Если меню - это Lampa.Activity, можно вызвать обновление меню
-                    // Например, повторная отрисовка или перерисовка
-                    if (typeof Lampa.Activity.render === 'function') {
-                        Lampa.Activity.render();
-                    }
+            if (animeItem) {
+                if (animeItem.title !== 'Мультфильмы') {
+                    animeItem.title = 'Мультфильмы';
+                    replaced = true;
+                    log('Заголовок пункта "anime" заменён на "Мультфильмы"');
+                    updateMenuUI();
+                } else {
+                    log('Заголовок уже заменён');
                 }
+            } else {
+                log('Пункт "anime" не найден в меню');
             }
         } catch (e) {
-            console.error(`[${pluginName}] Ошибка при замене заголовка:`, e);
+            log('Ошибка при замене заголовка:', e);
         }
     }
 
-    // Следим за загрузкой приложения
-    Lampa.Listener.follow('app', function onAppLoad(e) {
-        try {
-            if (!e.loaded) return;
+    function tryReplace() {
+        if (replaced) return;
 
-            // Получаем меню из Lampa.Plugins (обычно меню лежит в plugins['menu'] или в Lampa.Menu)
-            let menuItems = null;
+        const menuItems = findMenuItems();
 
-            if (Lampa.Plugins && Lampa.Plugins.menu && Array.isArray(Lampa.Plugins.menu.items)) {
-                menuItems = Lampa.Plugins.menu.items;
-            } else if (Lampa.Menu && Array.isArray(Lampa.Menu.items)) {
-                menuItems = Lampa.Menu.items;
-            }
-
-            if (!menuItems) {
-                // Если меню не найдено, подождём ещё, можно повторить попытку
-                setTimeout(() => {
-                    Lampa.Listener.follow('app', onAppLoad);
-                }, 500);
-                return;
-            }
-
+        if (menuItems && menuItems.length) {
             replaceTitle(menuItems);
+        } else {
+            if (retryCount < maxRetries) {
+                retryCount++;
+                log(`Меню не найдено, попытка ${retryCount} из ${maxRetries}`);
+                setTimeout(tryReplace, retryDelay);
+            } else {
+                log('Максимальное число попыток достигнуто, замена отменена');
+            }
+        }
+    }
 
-        } catch (e) {
-            console.error(`[${pluginName}] Ошибка при обработке app load:`, e);
+    // Ждём загрузки приложения
+    Lampa.Listener.follow('app', function onAppLoad(e) {
+        if (e.loaded) {
+            log('Приложение загружено, запускаем замену...');
+            tryReplace();
         }
     });
 
-    // Регистрируем плагин в Lampa.Plugins (если нужно)
     if (Lampa.Plugins) {
         Lampa.Plugins[pluginName] = {
             name: 'Замена "Аниме" на "Мультфильмы"',
-            version: '1.0',
+            version: '1.1',
             author: 'ChatGPT',
         };
     }
